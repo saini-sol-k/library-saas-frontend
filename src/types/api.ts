@@ -206,3 +206,57 @@ export interface MembershipResponse {
 
 /** Which tenant a membership list belongs to. */
 export type MembershipScope = "organizations" | "libraries";
+
+/* -------------------------------------------------------------------------- */
+/* Student memberships                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A student's dated entitlement to use a library.
+ *
+ * Distinct from MembershipResponse above, which records which staff users
+ * belong to an organization or library. These two are different domains that
+ * unfortunately share the word "membership", so the student side is prefixed
+ * throughout.
+ */
+export const STUDENT_MEMBERSHIP_STATUSES = ["ACTIVE", "EXPIRED", "CANCELLED"] as const;
+export type StudentMembershipStatus = (typeof STUDENT_MEMBERSHIP_STATUSES)[number];
+
+export interface StudentMembershipResponse {
+  membershipId: number;
+  libraryId: number | null;
+  studentId: number | null;
+  studentCode: string | null;
+  studentName: string | null;
+  membershipNumber: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  autoRenew: boolean;
+  /** Derived by the backend from the end date, independent of status. */
+  expired: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+  version: number | null;
+}
+
+/** Create payload. The library comes from the path, never the body. */
+export interface StudentMembershipRequest {
+  studentId: number;
+  membershipNumber: string;
+  startDate: string;
+  endDate: string;
+  autoRenew?: boolean;
+}
+
+/** The editable part of a membership, also used to describe a renewal period. */
+export interface StudentMembershipUpdateRequest {
+  membershipNumber: string;
+  startDate: string;
+  endDate: string;
+  autoRenew?: boolean;
+}
+
+export interface StudentMembershipStatusRequest {
+  status: StudentMembershipStatus;
+}

@@ -76,12 +76,22 @@ const MESSAGES: Record<string, string> = {
   USER_NOT_FOUND: "That user account was not found.",
   USER_ALREADY_IN_ORGANIZATION: "This user is already a member of the organization.",
   MEMBERSHIP_STATUS_UNCHANGED: "That membership already has this status.",
-  INVALID_MEMBERSHIP_STATUS: "A membership can only be Active or Inactive.",
+  // Shared by staff memberships (Active/Inactive) and student memberships
+  // (Active/Expired/Cancelled), so the wording stays true of both.
+  INVALID_MEMBERSHIP_STATUS: "That status is not allowed for this membership.",
   ORGANIZATION_MEMBERSHIP_INACTIVE: "That organization membership is not active.",
   LIBRARY_MEMBERSHIP_INACTIVE: "That library membership is not active.",
   LIBRARY_INACTIVE: "This library is inactive, so its memberships cannot be changed.",
   LIBRARY_ORGANIZATION_MISSING: "That library is not linked to an organization.",
   USER_ALREADY_IN_LIBRARY: "This user is already a member of the library.",
+  // Student memberships
+  STUDENT_MEMBERSHIP_NOT_FOUND: "That membership was not found.",
+  STUDENT_NOT_IN_LIBRARY: "That student does not belong to this library.",
+  INVALID_MEMBERSHIP_PERIOD: "The end date must be after the start date.",
+  MEMBERSHIP_NUMBER_ALREADY_EXISTS:
+    "That membership number is already used in this library.",
+  STUDENT_MEMBERSHIP_OVERLAP:
+    "This student already has an active membership covering those dates.",
   USER_NOT_IN_ORGANIZATION: "This user is not a member of the organization.",
   USER_NOT_IN_LIBRARY: "This user is not a member of the library.",
   ORGANIZATION_LAST_MEMBER: "An organization must keep at least one active member.",

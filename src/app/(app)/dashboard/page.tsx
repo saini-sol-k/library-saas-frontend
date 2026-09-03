@@ -190,7 +190,7 @@ export default function DashboardPage() {
             <CardTitle>Expiring Memberships</CardTitle>
           </CardHeader>
           <div className="p-5">
-            <ApiGapNotice gap="studentMemberships" />
+            <ApiGapNotice gap="membershipExpiry" />
             <p className="mt-3 text-[13px] text-ink3">
               Requirement captured: show memberships expiring within 15 days once the endpoint
               exists.

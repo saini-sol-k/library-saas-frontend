@@ -27,12 +27,19 @@ export interface ApiGap {
 }
 
 export const API_GAPS = {
-  studentMemberships: {
-    capability: "Student membership plans, activation and expiry",
-    suggestedEndpoint: "GET/POST /api/students/{id}/memberships",
+  membershipExpiry: {
+    capability: "Expiring-soon memberships, automatic expiry and auto-renewal",
+    suggestedEndpoint: "GET /api/libraries/{id}/student-memberships?expiringWithinDays= plus a scheduled job",
+    status: "not-modelled",
+    tables: ["student_membership"],
+    note: "Memberships are created, renewed and cancelled through StudentMembershipController, but nothing sweeps a past end date into EXPIRED and auto_renew is stored without acting on it. The API reports `expired` derived from the end date so the UI can flag it.",
+  },
+  membershipPricing: {
+    capability: "Attaching a fee plan and an invoice to a membership",
+    suggestedEndpoint: "GET/POST /api/libraries/{id}/fee-plans, /student-fees",
     status: "schema-only",
-    tables: ["student_membership", "fee_plan"],
-    note: "MembershipController exists but manages staff membership of organizations and libraries, not student subscriptions.",
+    tables: ["fee_plan", "student_fee"],
+    note: "student_fee.membership_id already points at student_membership, so a membership can be billed once fees exist. Memberships themselves carry no price.",
   },
   attendance: {
     capability: "Check-in / check-out and attendance history",
@@ -98,4 +105,9 @@ export const AVAILABLE_APIS = [
   "GET/POST/DELETE /api/libraries/{id}/members",
   "PUT /api/organizations/{id}/members/{userId}/status, /primary",
   "PUT /api/libraries/{id}/members/{userId}/status, /primary",
+  "GET/POST /api/libraries/{id}/student-memberships",
+  "GET/PUT /api/student-memberships/{id}",
+  "PUT /api/student-memberships/{id}/status",
+  "POST /api/student-memberships/{id}/renew",
+  "GET /api/students/{id}/memberships",
 ] as const;

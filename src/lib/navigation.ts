@@ -33,7 +33,7 @@ export const NAVIGATION: NavSection[] = [
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { href: "/students", label: "Students", icon: Users, authority: "STUDENT_VIEW" },
-      { href: "/memberships", label: "Memberships", icon: UserCheck, gap: "studentMemberships" },
+      { href: "/memberships", label: "Memberships", icon: UserCheck, authority: "STUDENT_VIEW" },
       { href: "/seats", label: "Seats", icon: Sofa, authority: "SEAT_VIEW" },
       { href: "/check-in-out", label: "Check-In / Check-Out", icon: LogIn, gap: "attendance" },
       {
