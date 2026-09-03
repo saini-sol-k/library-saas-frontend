@@ -102,4 +102,8 @@ export const AVAILABLE_APIS = [
   "GET /api/student-fees/{id}, GET /api/students/{id}/fees",
   "GET/POST /api/student-fees/{id}/payments",
   "GET /api/libraries/{id}/payments, /api/payments/{id}, /api/students/{id}/payments",
+  "GET/POST /api/students/{id}/documents",
+  "GET/PUT /api/student-documents/{id}",
+  "GET/POST /api/students/{id}/emergency-contacts",
+  "GET/PUT/DELETE /api/student-emergency-contacts/{id}",
 ] as const;

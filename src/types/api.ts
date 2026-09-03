@@ -411,3 +411,79 @@ export interface PaymentRequest {
   paymentMethod: string;
   transactionReference?: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Student profile: documents and emergency contacts                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A document reference on a student's file.
+ *
+ * `documentUrl` is a path to where the file lives, not the file itself. The API
+ * neither accepts nor serves binary content. ACTIVE is the only status the
+ * schema evidences, so there is no archive state to render.
+ */
+export interface StudentDocumentResponse {
+  documentId: number;
+  studentId: number | null;
+  documentType: string;
+  documentNumber: string | null;
+  documentUrl: string | null;
+  status: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface StudentDocumentRequest {
+  documentType: string;
+  documentNumber?: string;
+  documentUrl?: string;
+}
+
+/**
+ * The address of an emergency contact.
+ *
+ * Deliberately has no id. The backend creates the address inline and never
+ * accepts one by reference, because the address table is global and an id from
+ * a client could point at another tenant's row.
+ */
+export interface EmergencyContactAddress {
+  addressLine1: string;
+  addressLine2?: string | null;
+  addressLine3?: string | null;
+  landmark?: string | null;
+  city: string;
+  district?: string | null;
+  state: string;
+  country?: string | null;
+  postalCode: string;
+  phone1?: string | null;
+  phone2?: string | null;
+  email?: string | null;
+}
+
+export interface EmergencyContactResponse {
+  emergencyContactId: number;
+  studentId: number | null;
+  firstName: string;
+  lastName: string | null;
+  relationship: string | null;
+  mobile: string | null;
+  email: string | null;
+  isPrimary: boolean;
+  /** Null when the contact has no address on file. */
+  address: EmergencyContactAddress | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+/** Omitting `address` on an update leaves the existing one unchanged. */
+export interface EmergencyContactRequest {
+  firstName: string;
+  lastName?: string;
+  relationship?: string;
+  mobile?: string;
+  email?: string;
+  isPrimary?: boolean;
+  address?: EmergencyContactAddress;
+}

@@ -113,6 +113,9 @@ const MESSAGES: Record<string, string> = {
   PAYMENT_EXCEEDS_BALANCE: "That is more than the outstanding balance on this invoice.",
   INVALID_PAYMENT_AMOUNT: "A payment must be greater than zero.",
   STUDENT_FEE_ALREADY_PAID: "This invoice is already settled in full.",
+  // Student profile
+  STUDENT_DOCUMENT_NOT_FOUND: "That document was not found.",
+  EMERGENCY_CONTACT_NOT_FOUND: "That emergency contact was not found.",
   USER_NOT_IN_ORGANIZATION: "This user is not a member of the organization.",
   USER_NOT_IN_LIBRARY: "This user is not a member of the library.",
   ORGANIZATION_LAST_MEMBER: "An organization must keep at least one active member.",

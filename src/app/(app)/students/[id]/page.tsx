@@ -12,6 +12,8 @@ import { ErrorState, LoadingState } from "@/components/ui/states";
 import { AddressPanel } from "@/features/addresses/address-panel";
 import { StudentAttendanceHistory } from "@/features/attendance/student-attendance-history";
 import { StudentFinanceCard } from "@/features/finance/student-finance-card";
+import { DocumentPanel } from "@/features/student-profile/document-panel";
+import { EmergencyContactPanel } from "@/features/student-profile/emergency-contact-panel";
 import { StudentSeatCard } from "@/features/seats/student-seat-card";
 import { StudentMembershipHistory } from "@/features/student-memberships/student-membership-history";
 import { useDeleteStudent, useStudent } from "@/hooks/use-students";
@@ -105,6 +107,14 @@ export default function StudentDetailPage() {
           </Card>
 
           <AddressPanel owner="students" ownerId={student.id} canEdit={can("STUDENT_UPDATE")} />
+
+          {can("STUDENT_VIEW") ? (
+            <EmergencyContactPanel studentId={student.id} canManage={can("STUDENT_UPDATE")} />
+          ) : null}
+
+          {can("STUDENT_VIEW") ? (
+            <DocumentPanel studentId={student.id} canManage={can("STUDENT_UPDATE")} />
+          ) : null}
         </div>
 
         <div className="space-y-4">
