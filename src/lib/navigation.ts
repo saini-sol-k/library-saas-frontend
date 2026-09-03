@@ -49,7 +49,7 @@ export const NAVIGATION: NavSection[] = [
         authority: "PAYMENT_VIEW",
       },
       { href: "/notifications", label: "Notifications", icon: Bell, gap: "notifications" },
-      { href: "/reports", label: "Reports", icon: BarChart3, authority: "REPORT_VIEW", gap: "reports" },
+      { href: "/reports", label: "Reports", icon: BarChart3, authority: "REPORT_VIEW" },
     ],
   },
   {

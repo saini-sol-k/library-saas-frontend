@@ -487,3 +487,91 @@ export interface EmergencyContactRequest {
   isPrimary?: boolean;
   address?: EmergencyContactAddress;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Reporting and dashboard metrics                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Reporting is library-scoped and read-only, and every endpoint requires
+ * REPORT_VIEW. The backend decides which library's rows are aggregated from the
+ * id in the path; nothing here filters for security.
+ *
+ * `reportingDate` is the library's own calendar day, derived by the backend from
+ * the library's stored timezone. The UI displays it and never recomputes "today"
+ * from the browser clock, which would disagree for a library in another zone.
+ *
+ * Money arrives as decimal strings, as in Phase 2F, and stays a string.
+ */
+export interface DashboardSummaryResponse {
+  libraryId: number;
+  libraryName: string | null;
+  timezone: string;
+  reportingDate: string;
+  totalStudents: number;
+  studentsByStatus: Record<string, number>;
+  totalSeats: number;
+  occupiedSeats: number;
+  availableSeats: number;
+  seatsByStatus: Record<string, number>;
+  activeMemberships: number;
+  attendanceToday: number;
+  studentsCurrentlyInside: number;
+  collectionToday: Money;
+  paymentsToday: number;
+}
+
+/** One membership approaching its end date. The report never changes a status. */
+export interface ExpiringMembershipResponse {
+  membershipId: number;
+  studentId: number | null;
+  studentCode: string | null;
+  studentName: string | null;
+  membershipNumber: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  autoRenew: boolean;
+  daysRemaining: number;
+}
+
+export interface CollectionDayResponse {
+  date: string;
+  paymentCount: number;
+  amount: Money;
+}
+
+export interface CollectionMethodResponse {
+  paymentMethod: string;
+  paymentCount: number;
+  amount: Money;
+}
+
+/** Successful payments only, grouped by the library's local day and by method. */
+export interface CollectionReportResponse {
+  libraryId: number;
+  timezone: string;
+  fromDate: string;
+  toDate: string;
+  totalCollected: Money;
+  paymentCount: number;
+  byDay: CollectionDayResponse[];
+  byMethod: CollectionMethodResponse[];
+}
+
+/** Invoiced less settled, with the overdue share, all computed by the backend. */
+export interface OutstandingSummaryResponse {
+  libraryId: number;
+  timezone: string;
+  asOfDate: string;
+  invoiceCount: number;
+  totalInvoiced: Money;
+  totalSettled: Money;
+  totalOutstanding: Money;
+  overdueInvoiceCount: number;
+  overdueAmount: Money;
+}
+
+/** The window the dashboard has asked for since Phase 1, and the backend cap. */
+export const EXPIRY_WINDOW_DEFAULT_DAYS = 15;
+export const EXPIRY_WINDOW_MAX_DAYS = 365;

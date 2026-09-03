@@ -28,27 +28,23 @@ export interface ApiGap {
 
 export const API_GAPS = {
   membershipExpiry: {
-    capability: "Expiring-soon memberships, automatic expiry and auto-renewal",
-    suggestedEndpoint: "GET /api/libraries/{id}/student-memberships?expiringWithinDays= plus a scheduled job",
+    capability: "Automatic membership expiry and auto-renewal",
+    suggestedEndpoint: "a scheduled job, no endpoint",
     status: "not-modelled",
     tables: ["student_membership"],
-    note: "Memberships are created, renewed and cancelled through StudentMembershipController, but nothing sweeps a past end date into EXPIRED and auto_renew is stored without acting on it. The API reports `expired` derived from the end date so the UI can flag it.",
+    note: "The expiring-soon list is now served by the reporting API, but nothing sweeps a past end date into EXPIRED and auto_renew is still stored without being acted on. The API reports `expired` derived from the end date so screens can flag it.",
   },
   notifications: {
     capability: "In-app notifications and delivery log",
     suggestedEndpoint: "GET /api/notifications",
     status: "not-modelled",
   },
-  reports: {
-    capability: "Aggregated reporting and analytics",
-    suggestedEndpoint: "GET /api/reports/*",
-    status: "not-modelled",
-  },
-  dashboardMetrics: {
-    capability: "Dashboard aggregates other than the student count",
-    suggestedEndpoint: "GET /api/dashboard/summary",
-    status: "not-modelled",
-    note: "Total Students comes from the paged student endpoint and the seat tiles from the seat endpoints. The remaining tiles need attendance, memberships or payments first.",
+  recentActivityFeeds: {
+    capability: "Feeds of individual recent check-ins and receipts on the dashboard",
+    suggestedEndpoint: "GET /api/libraries/{id}/attendance?limit=, /payments?limit=",
+    status: "schema-only",
+    tables: ["attendance", "payment"],
+    note: "Reporting returns today's counts and totals, but no endpoint returns the most recent few rows for a dashboard feed. The detail screens list them in full instead.",
   },
   userDirectory: {
     capability: "Searching users who are not yet members, to add them to a tenant",
@@ -106,4 +102,8 @@ export const AVAILABLE_APIS = [
   "GET/PUT /api/student-documents/{id}",
   "GET/POST /api/students/{id}/emergency-contacts",
   "GET/PUT/DELETE /api/student-emergency-contacts/{id}",
+  "GET /api/libraries/{id}/dashboard",
+  "GET /api/libraries/{id}/reports/expiring-memberships?days=",
+  "GET /api/libraries/{id}/reports/collection?from=&to=",
+  "GET /api/libraries/{id}/reports/outstanding",
 ] as const;
