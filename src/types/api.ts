@@ -260,3 +260,44 @@ export interface StudentMembershipUpdateRequest {
 export interface StudentMembershipStatusRequest {
   status: StudentMembershipStatus;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Attendance                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Statuses a visit may hold. PRESENT is the schema default for an open visit;
+ * COMPLETED is set on check-out. The backend rejects anything else.
+ */
+export const ATTENDANCE_STATUSES = ["PRESENT", "COMPLETED"] as const;
+export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number];
+
+/**
+ * One visit: a student checking into a library and, later, out again.
+ *
+ * `open` is derived by the backend from the absence of a check-out time, which
+ * is what actually decides whether the visit is still running. Duration is
+ * recorded in minutes on check-out and is null while open.
+ */
+export interface AttendanceResponse {
+  attendanceId: number;
+  libraryId: number | null;
+  studentId: number | null;
+  studentCode: string | null;
+  studentName: string | null;
+  seatId: number | null;
+  seatNumber: string | null;
+  attendanceDate: string;
+  checkInTime: string;
+  checkOutTime: string | null;
+  durationMinutes: number | null;
+  status: string;
+  open: boolean;
+}
+
+/** Check a student in. The library comes from the path, never the body. */
+export interface CheckInRequest {
+  studentId: number;
+  /** Optional. Must belong to the same library; defaults to the student's allocation. */
+  seatId?: number;
+}

@@ -92,6 +92,12 @@ const MESSAGES: Record<string, string> = {
     "That membership number is already used in this library.",
   STUDENT_MEMBERSHIP_OVERLAP:
     "This student already has an active membership covering those dates.",
+  // Attendance
+  ATTENDANCE_NOT_FOUND: "That attendance record was not found.",
+  STUDENT_ALREADY_CHECKED_IN: "This student is already checked in.",
+  ATTENDANCE_ALREADY_CLOSED: "That visit has already been checked out.",
+  INVALID_ATTENDANCE_STATUS: "A visit can only be Present or Completed.",
+  INVALID_ATTENDANCE_PERIOD: "The check-out time cannot be before the check-in time.",
   USER_NOT_IN_ORGANIZATION: "This user is not a member of the organization.",
   USER_NOT_IN_LIBRARY: "This user is not a member of the library.",
   ORGANIZATION_LAST_MEMBER: "An organization must keep at least one active member.",

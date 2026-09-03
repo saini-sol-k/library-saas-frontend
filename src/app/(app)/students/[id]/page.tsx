@@ -8,8 +8,9 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
-import { ApiGapNotice, ErrorState, LoadingState } from "@/components/ui/states";
+import { ErrorState, LoadingState } from "@/components/ui/states";
 import { AddressPanel } from "@/features/addresses/address-panel";
+import { StudentAttendanceHistory } from "@/features/attendance/student-attendance-history";
 import { StudentSeatCard } from "@/features/seats/student-seat-card";
 import { StudentMembershipHistory } from "@/features/student-memberships/student-membership-history";
 import { useDeleteStudent, useStudent } from "@/hooks/use-students";
@@ -110,14 +111,7 @@ export default function StudentDetailPage() {
 
           {can("STUDENT_VIEW") ? <StudentMembershipHistory studentId={student.id} /> : null}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Attendance</CardTitle>
-            </CardHeader>
-            <div className="p-5">
-              <ApiGapNotice gap="attendance" />
-            </div>
-          </Card>
+          {can("ATTENDANCE_VIEW") ? <StudentAttendanceHistory studentId={student.id} /> : null}
         </div>
       </div>
 

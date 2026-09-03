@@ -181,7 +181,7 @@ export default function DashboardPage() {
             <CardTitle>Recent Check-ins</CardTitle>
           </CardHeader>
           <div className="p-5">
-            <ApiGapNotice gap="attendance" />
+            <ApiGapNotice gap="dashboardMetrics" />
           </div>
         </Card>
 

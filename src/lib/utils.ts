@@ -38,6 +38,26 @@ export function formatDateTime(value: string | null | undefined): string {
   }).format(date);
 }
 
+/** Clock time only, for rows that already sit under a known date. */
+export function formatTime(value: string | null | undefined): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+/** Minutes as hours and minutes. Null means the visit is still open. */
+export function formatDuration(minutes: number | null | undefined): string {
+  if (minutes === null || minutes === undefined || Number.isNaN(minutes)) return "—";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`;
+}
+
 export function fullName(first: string, last?: string | null): string {
   return [first, last].filter(Boolean).join(" ");
 }

@@ -41,12 +41,6 @@ export const API_GAPS = {
     tables: ["fee_plan", "student_fee"],
     note: "student_fee.membership_id already points at student_membership, so a membership can be billed once fees exist. Memberships themselves carry no price.",
   },
-  attendance: {
-    capability: "Check-in / check-out and attendance history",
-    suggestedEndpoint: "POST /api/attendance/check-in, /check-out, GET /api/attendance",
-    status: "schema-only",
-    tables: ["attendance"],
-  },
   payments: {
     capability: "Fee collection, receipts and payment history",
     suggestedEndpoint: "GET/POST /api/payments",
@@ -110,4 +104,9 @@ export const AVAILABLE_APIS = [
   "PUT /api/student-memberships/{id}/status",
   "POST /api/student-memberships/{id}/renew",
   "GET /api/students/{id}/memberships",
+  "GET /api/libraries/{id}/attendance",
+  "POST /api/libraries/{id}/attendance/check-in",
+  "GET /api/attendance/{id}",
+  "POST /api/attendance/{id}/check-out",
+  "GET /api/students/{id}/attendance",
 ] as const;
