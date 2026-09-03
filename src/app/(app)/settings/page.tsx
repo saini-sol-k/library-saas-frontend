@@ -5,6 +5,7 @@ import { Badge, StatusBadge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableWrap, Td, Th, Tr } from "@/components/ui/table";
 import { EmptyState, LoadingState } from "@/components/ui/states";
+import { AddressPanel } from "@/features/addresses/address-panel";
 import { PageHeader } from "@/layouts/app-shell";
 import { AVAILABLE_APIS } from "@/lib/api-gaps";
 import { useSession } from "@/providers/session-provider";
@@ -15,8 +16,16 @@ import { useSession } from "@/providers/session-provider";
  * memberships, so nothing here is hard-coded to a single library.
  */
 export default function SettingsPage() {
-  const { organizations, libraries, activeLibrary, setActiveLibrary, tenantLoading, authorities } =
-    useSession();
+  const {
+    organizations,
+    libraries,
+    activeLibrary,
+    activeOrganization,
+    setActiveLibrary,
+    tenantLoading,
+    authorities,
+    can,
+  } = useSession();
 
   return (
     <>
@@ -124,6 +133,29 @@ export default function SettingsPage() {
               </TableWrap>
             )}
           </Card>
+
+          {/*
+            Addresses are shown for the tenants the user can actually read.
+            Organization visibility is a privilege, so a library-scoped role
+            simply does not see that panel rather than being shown a 403.
+          */}
+          {activeOrganization && can("ORGANIZATION_VIEW") ? (
+            <AddressPanel
+              owner="organizations"
+              ownerId={activeOrganization.organizationId}
+              title={`${activeOrganization.name} — Addresses`}
+              canEdit={can("ORGANIZATION_UPDATE")}
+            />
+          ) : null}
+
+          {activeLibrary ? (
+            <AddressPanel
+              owner="libraries"
+              ownerId={activeLibrary.libraryId}
+              title={`${activeLibrary.name} — Addresses`}
+              canEdit={can("LIBRARY_UPDATE")}
+            />
+          ) : null}
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>

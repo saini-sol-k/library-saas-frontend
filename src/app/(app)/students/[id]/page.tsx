@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { ApiGapNotice, ErrorState, LoadingState } from "@/components/ui/states";
+import { AddressPanel } from "@/features/addresses/address-panel";
 import { useDeleteStudent, useStudent } from "@/hooks/use-students";
 import { PageHeader } from "@/layouts/app-shell";
 import { messageFor } from "@/lib/api-error";
@@ -78,7 +79,7 @@ export default function StudentDetailPage() {
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+        <div className="space-y-4 xl:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Student Details</CardTitle>
@@ -98,6 +99,8 @@ export default function StudentDetailPage() {
               </dl>
             </div>
           </Card>
+
+          <AddressPanel owner="students" ownerId={student.id} canEdit={can("STUDENT_UPDATE")} />
         </div>
 
         <div className="space-y-4">

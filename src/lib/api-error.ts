@@ -35,6 +35,12 @@ const MESSAGES: Record<string, string> = {
   STUDENT_CODE_ALREADY_EXISTS:
     "That student code is already used in this library. Pick a different code.",
 
+  // Addresses
+  ADDRESS_NOT_FOUND: "That address is no longer on this record.",
+  ADDRESS_TYPE_ALREADY_EXISTS:
+    "An address of this type already exists. Edit the existing one, or choose another type.",
+  INVALID_ADDRESS_TYPE: "That is not a valid address type for this record.",
+
   // Organizations and libraries
   ORGANIZATION_NOT_FOUND: "That organization no longer exists.",
   ORGANIZATION_CODE_ALREADY_EXISTS: "That organization code is already taken.",
