@@ -34,19 +34,6 @@ export const API_GAPS = {
     tables: ["student_membership"],
     note: "Memberships are created, renewed and cancelled through StudentMembershipController, but nothing sweeps a past end date into EXPIRED and auto_renew is stored without acting on it. The API reports `expired` derived from the end date so the UI can flag it.",
   },
-  membershipPricing: {
-    capability: "Attaching a fee plan and an invoice to a membership",
-    suggestedEndpoint: "GET/POST /api/libraries/{id}/fee-plans, /student-fees",
-    status: "schema-only",
-    tables: ["fee_plan", "student_fee"],
-    note: "student_fee.membership_id already points at student_membership, so a membership can be billed once fees exist. Memberships themselves carry no price.",
-  },
-  payments: {
-    capability: "Fee collection, receipts and payment history",
-    suggestedEndpoint: "GET/POST /api/payments",
-    status: "schema-only",
-    tables: ["payment", "student_fee", "fee_plan"],
-  },
   notifications: {
     capability: "In-app notifications and delivery log",
     suggestedEndpoint: "GET /api/notifications",
@@ -109,4 +96,10 @@ export const AVAILABLE_APIS = [
   "GET /api/attendance/{id}",
   "POST /api/attendance/{id}/check-out",
   "GET /api/students/{id}/attendance",
+  "GET/POST /api/libraries/{id}/fee-plans",
+  "GET/PUT /api/fee-plans/{id}, PUT /api/fee-plans/{id}/status",
+  "GET/POST /api/libraries/{id}/student-fees",
+  "GET /api/student-fees/{id}, GET /api/students/{id}/fees",
+  "GET/POST /api/student-fees/{id}/payments",
+  "GET /api/libraries/{id}/payments, /api/payments/{id}, /api/students/{id}/payments",
 ] as const;

@@ -14,6 +14,21 @@ export function formatCurrency(value: number, currency = "INR"): string {
   }).format(value);
 }
 
+/**
+ * Formats a decimal amount that arrived from the API as a string.
+ *
+ * The conversion to a number happens here and nowhere else, and only to hand a
+ * value to Intl for display. Amounts are never added, subtracted or compared as
+ * numbers in this app: the backend computes every total and balance in exact
+ * decimal, and the UI only renders what it is given.
+ */
+export function formatMoney(value: string | null | undefined, currency = "INR"): string {
+  if (value === null || value === undefined || value === "") return "—";
+  const asNumber = Number(value);
+  if (Number.isNaN(asNumber)) return "—";
+  return formatCurrency(asNumber, currency);
+}
+
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);

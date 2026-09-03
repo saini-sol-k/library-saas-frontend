@@ -11,6 +11,7 @@ import { ConfirmDialog } from "@/components/ui/dialog";
 import { ErrorState, LoadingState } from "@/components/ui/states";
 import { AddressPanel } from "@/features/addresses/address-panel";
 import { StudentAttendanceHistory } from "@/features/attendance/student-attendance-history";
+import { StudentFinanceCard } from "@/features/finance/student-finance-card";
 import { StudentSeatCard } from "@/features/seats/student-seat-card";
 import { StudentMembershipHistory } from "@/features/student-memberships/student-membership-history";
 import { useDeleteStudent, useStudent } from "@/hooks/use-students";
@@ -112,6 +113,8 @@ export default function StudentDetailPage() {
           {can("STUDENT_VIEW") ? <StudentMembershipHistory studentId={student.id} /> : null}
 
           {can("ATTENDANCE_VIEW") ? <StudentAttendanceHistory studentId={student.id} /> : null}
+
+          {can("FEE_PLAN_VIEW") ? <StudentFinanceCard studentId={student.id} /> : null}
         </div>
       </div>
 

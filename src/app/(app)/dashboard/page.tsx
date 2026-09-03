@@ -203,7 +203,7 @@ export default function DashboardPage() {
             <CardTitle>Recent Payments</CardTitle>
           </CardHeader>
           <div className="p-5">
-            <ApiGapNotice gap="payments" />
+            <ApiGapNotice gap="dashboardMetrics" />
           </div>
         </Card>
       </div>

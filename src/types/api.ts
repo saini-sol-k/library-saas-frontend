@@ -301,3 +301,113 @@ export interface CheckInRequest {
   /** Optional. Must belong to the same library; defaults to the student's allocation. */
   seatId?: number;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Fees and payments                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Money crosses the wire as a decimal string, never a JavaScript number.
+ *
+ * The backend columns are DECIMAL(12,2) and the API serialises them exactly.
+ * Parsing them into a float here would reintroduce the rounding the backend
+ * carefully avoids, so amounts stay strings and are formatted for display
+ * rather than arithmetic. The UI never computes a total or a balance; the
+ * backend supplies both.
+ */
+export type Money = string;
+
+export const FEE_PLAN_STATUSES = ["ACTIVE", "INACTIVE"] as const;
+export type FeePlanStatus = (typeof FEE_PLAN_STATUSES)[number];
+
+export interface FeePlanResponse {
+  feePlanId: number;
+  libraryId: number | null;
+  name: string;
+  description: string | null;
+  amount: Money;
+  durationValue: number;
+  durationUnit: string;
+  status: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface FeePlanRequest {
+  name: string;
+  description?: string;
+  amount: Money;
+  durationValue: number;
+  durationUnit: string;
+}
+
+export interface FeePlanStatusRequest {
+  status: FeePlanStatus;
+}
+
+/** PENDING, PARTIALLY_PAID and PAID are derived by the backend from payments. */
+export const STUDENT_FEE_STATUSES = ["PENDING", "PARTIALLY_PAID", "PAID"] as const;
+export type StudentFeeStatus = (typeof STUDENT_FEE_STATUSES)[number];
+
+/**
+ * One invoice. `paidAmount` and `balanceAmount` are computed by the backend
+ * from the payments, so they are read and displayed, never recalculated here.
+ */
+export interface StudentFeeResponse {
+  studentFeeId: number;
+  libraryId: number | null;
+  studentId: number | null;
+  studentCode: string | null;
+  studentName: string | null;
+  membershipId: number | null;
+  feePlanId: number | null;
+  feePlanName: string | null;
+  invoiceNumber: string;
+  amount: Money;
+  discountAmount: Money;
+  taxAmount: Money;
+  totalAmount: Money;
+  paidAmount: Money;
+  balanceAmount: Money;
+  dueDate: string;
+  status: string;
+  overdue: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+/** The total is deliberately absent: the backend derives it from the parts. */
+export interface StudentFeeRequest {
+  studentId: number;
+  feePlanId?: number;
+  membershipId?: number;
+  invoiceNumber: string;
+  amount?: Money;
+  discountAmount?: Money;
+  taxAmount?: Money;
+  dueDate: string;
+}
+
+export interface PaymentResponse {
+  paymentId: number;
+  libraryId: number | null;
+  studentId: number | null;
+  studentCode: string | null;
+  studentName: string | null;
+  studentFeeId: number | null;
+  invoiceNumber: string | null;
+  receiptNumber: string;
+  amount: Money;
+  paymentMethod: string;
+  transactionReference: string | null;
+  paymentDate: string;
+  status: string;
+}
+
+/** The student and library are inherited from the invoice, never sent. */
+export interface PaymentRequest {
+  receiptNumber: string;
+  amount: Money;
+  paymentMethod: string;
+  transactionReference?: string;
+}
