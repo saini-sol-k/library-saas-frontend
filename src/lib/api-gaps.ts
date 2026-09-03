@@ -34,12 +34,6 @@ export const API_GAPS = {
     tables: ["student_membership", "fee_plan"],
     note: "MembershipController exists but manages staff membership of organizations and libraries, not student subscriptions.",
   },
-  seats: {
-    capability: "Seat inventory, zones, types and live occupancy",
-    suggestedEndpoint: "GET /api/libraries/{id}/seats",
-    status: "schema-only",
-    tables: ["seat", "seat_type", "seat_zone", "seat_assignment"],
-  },
   attendance: {
     capability: "Check-in / check-out and attendance history",
     suggestedEndpoint: "POST /api/attendance/check-in, /check-out, GET /api/attendance",
@@ -66,7 +60,7 @@ export const API_GAPS = {
     capability: "Dashboard aggregates other than the student count",
     suggestedEndpoint: "GET /api/dashboard/summary",
     status: "not-modelled",
-    note: "Total Students is derived from the existing paged student endpoint. Every other tile needs seats, attendance, memberships or payments first.",
+    note: "Total Students comes from the paged student endpoint and the seat tiles from the seat endpoints. The remaining tiles need attendance, memberships or payments first.",
   },
   currentUser: {
     capability: "Authenticated user's profile, roles and display name",
@@ -89,6 +83,10 @@ export const AVAILABLE_APIS = [
   "GET/POST/PUT/DELETE /api/organizations/{id}/addresses",
   "GET/POST/PUT/DELETE /api/libraries/{id}/addresses",
   "GET/POST/PUT/DELETE /api/students/{id}/addresses",
+  "GET/POST/PUT/DELETE /api/libraries/{id}/seats",
+  "POST/DELETE /api/libraries/{id}/seats/{seatId}/allocation",
+  "GET /api/libraries/{id}/seat-types, /seat-zones",
+  "GET /api/students/{id}/seat-allocation",
   "POST/DELETE /api/organizations/{id}/members",
   "POST/DELETE /api/libraries/{id}/members",
 ] as const;

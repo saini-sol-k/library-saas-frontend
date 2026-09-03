@@ -41,6 +41,22 @@ const MESSAGES: Record<string, string> = {
     "An address of this type already exists. Edit the existing one, or choose another type.",
   INVALID_ADDRESS_TYPE: "That is not a valid address type for this record.",
 
+  // Seats
+  SEAT_NOT_FOUND: "That seat no longer exists in this library.",
+  SEAT_NUMBER_ALREADY_EXISTS:
+    "That seat number is already used in this library. Pick a different number.",
+  INVALID_SEAT_STATUS:
+    "That is not a valid seat status. A seat becomes Occupied by allocating it.",
+  SEAT_NOT_AVAILABLE: "That seat is not available, so it cannot be allocated.",
+  SEAT_ALREADY_ALLOCATED: "That seat is already allocated to another student.",
+  STUDENT_ALREADY_HAS_SEAT:
+    "This student already holds a seat. Release it before allocating another.",
+  SEAT_NOT_ALLOCATED: "That seat is not currently allocated, so there is nothing to release.",
+  SEAT_HAS_ACTIVE_ALLOCATION: "Release this seat before changing or retiring it.",
+  SEAT_ALREADY_INACTIVE: "That seat is already out of service.",
+  SEAT_ZONE_NOT_FOUND: "That zone does not belong to this library.",
+  SEAT_TYPE_NOT_FOUND: "That seat type does not belong to this library.",
+
   // Organizations and libraries
   ORGANIZATION_NOT_FOUND: "That organization no longer exists.",
   ORGANIZATION_CODE_ALREADY_EXISTS: "That organization code is already taken.",

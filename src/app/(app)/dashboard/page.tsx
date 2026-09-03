@@ -16,19 +16,21 @@ import { ApiGapNotice, EmptyState, ErrorState } from "@/components/ui/states";
 import { StatCard } from "@/features/dashboard/stat-card";
 import { messageFor } from "@/lib/api-error";
 import { formatDateTime, greeting } from "@/lib/utils";
+import { useSeats } from "@/hooks/use-seats";
+import { summariseSeats } from "@/types/seat";
 import { useSession } from "@/providers/session-provider";
 import { studentsService } from "@/services/students";
 
 /**
  * Dashboard.
  *
- * Only "Total Students" has a backing API today - it comes from the paged
- * student endpoint's totalElements. Every other tile is rendered in its real
- * position but explicitly marked unavailable, and the sections that need seats,
- * attendance, memberships or payments show the specific missing endpoint.
+ * Students and seats have backing APIs today, so those tiles carry real
+ * figures. Every other tile is rendered in its real position but explicitly
+ * marked unavailable, and the sections that need attendance, memberships or
+ * payments show the specific missing endpoint.
  */
 export default function DashboardPage() {
-  const { username, activeLibrary, activeOrganization } = useSession();
+  const { username, activeLibrary, activeOrganization, can } = useSession();
 
   const studentsQuery = useQuery({
     queryKey: ["students", "count"],
@@ -36,6 +38,14 @@ export default function DashboardPage() {
   });
 
   const totalStudents = studentsQuery.data?.totalElements;
+
+  // Seats are library-scoped, so the tiles follow the active library and stay
+  // idle for a role without SEAT_VIEW rather than firing a request that 403s.
+  const seatsQuery = useSeats(
+    can("SEAT_VIEW") ? (activeLibrary?.libraryId ?? null) : null,
+  );
+  const seatCounts = summariseSeats(seatsQuery.data ?? []);
+  const seatsReady = Boolean(seatsQuery.data);
 
   return (
     <div className="space-y-5">
@@ -73,8 +83,24 @@ export default function DashboardPage() {
           loading={studentsQuery.isLoading}
         />
         <StatCard label="Active Memberships" tone="success" icon={UserCheck} unavailable />
-        <StatCard label="Occupied Seats" tone="danger" icon={Sofa} unavailable />
-        <StatCard label="Available Seats" tone="success" icon={Sofa} unavailable />
+        <StatCard
+          label="Occupied Seats"
+          value={seatsReady ? seatCounts.occupied : 0}
+          delta={seatsReady ? `of ${seatCounts.total} seats` : ""}
+          tone="danger"
+          icon={Sofa}
+          loading={seatsQuery.isLoading}
+          unavailable={!seatsReady && !seatsQuery.isLoading}
+        />
+        <StatCard
+          label="Available Seats"
+          value={seatsReady ? seatCounts.available : 0}
+          delta={seatsReady ? "Ready to allocate" : ""}
+          tone="success"
+          icon={Sofa}
+          loading={seatsQuery.isLoading}
+          unavailable={!seatsReady && !seatsQuery.isLoading}
+        />
         <StatCard label="Students Inside" tone="accent" icon={LogIn} unavailable />
         <StatCard label="Today's Collection" tone="warn" icon={IndianRupee} unavailable />
       </div>
@@ -95,15 +121,45 @@ export default function DashboardPage() {
           <Card>
             <CardHeader
               action={
-                <Button variant="secondary" size="sm" disabled>
-                  View All Seats
-                </Button>
+                <Link href="/seats">
+                  <Button variant="secondary" size="sm">
+                    View All Seats
+                  </Button>
+                </Link>
               }
             >
               <CardTitle>Seat Status (Real Time)</CardTitle>
             </CardHeader>
             <div className="p-5">
-              <ApiGapNotice gap="seats" />
+              {seatsQuery.isError ? (
+                <ErrorState
+                  title="Could not load seats"
+                  description={messageFor(seatsQuery.error)}
+                  onRetry={() => seatsQuery.refetch()}
+                />
+              ) : seatsReady && seatCounts.total === 0 ? (
+                <EmptyState
+                  icon={Sofa}
+                  title="No seats recorded"
+                  description="Add seats to this library to track occupancy here."
+                />
+              ) : (
+                <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { label: "Available", value: seatCounts.available },
+                    { label: "Occupied", value: seatCounts.occupied },
+                    { label: "Maintenance", value: seatCounts.maintenance },
+                    { label: "Out of service", value: seatCounts.inactive },
+                  ].map((tile) => (
+                    <div key={tile.label} className="rounded-lg border border-line px-4 py-3">
+                      <dt className="text-[13px] text-ink3">{tile.label}</dt>
+                      <dd className="text-xl font-semibold tabular-nums text-ink">
+                        {seatsQuery.isLoading ? "—" : tile.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </div>
           </Card>
         </div>

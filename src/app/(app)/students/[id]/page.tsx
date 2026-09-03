@@ -10,6 +10,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { ApiGapNotice, ErrorState, LoadingState } from "@/components/ui/states";
 import { AddressPanel } from "@/features/addresses/address-panel";
+import { StudentSeatCard } from "@/features/seats/student-seat-card";
 import { useDeleteStudent, useStudent } from "@/hooks/use-students";
 import { PageHeader } from "@/layouts/app-shell";
 import { messageFor } from "@/lib/api-error";
@@ -104,6 +105,8 @@ export default function StudentDetailPage() {
         </div>
 
         <div className="space-y-4">
+          {can("SEAT_VIEW") ? <StudentSeatCard studentId={student.id} /> : null}
+
           <Card>
             <CardHeader>
               <CardTitle>Membership</CardTitle>

@@ -82,6 +82,7 @@ export function ConfirmDialog({
   description,
   confirmLabel = "Confirm",
   loading,
+  note = "This cannot be undone.",
 }: {
   open: boolean;
   onClose: () => void;
@@ -90,6 +91,8 @@ export function ConfirmDialog({
   description: string;
   confirmLabel?: string;
   loading?: boolean;
+  /** Overrides the default irreversibility note for actions that ARE reversible. */
+  note?: string;
 }) {
   return (
     <Dialog
@@ -108,7 +111,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="text-sm text-ink2">This cannot be undone.</p>
+      <p className="text-sm text-ink2">{note}</p>
     </Dialog>
   );
 }
