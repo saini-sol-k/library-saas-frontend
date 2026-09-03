@@ -177,3 +177,32 @@ export interface MembershipRequest {
   userId: number;
   isPrimary?: boolean;
 }
+
+/** Statuses a membership may hold. The backend rejects anything else. */
+export const MEMBERSHIP_STATUSES = ["ACTIVE", "INACTIVE"] as const;
+export type MembershipStatus = (typeof MEMBERSHIP_STATUSES)[number];
+
+export interface MembershipStatusRequest {
+  status: MembershipStatus;
+}
+
+/**
+ * One user's membership of one tenant. Exactly one of organizationId /
+ * libraryId is populated, depending on which list it came from. The backend
+ * maps only publishable user fields - never the password hash.
+ */
+export interface MembershipResponse {
+  userId: number;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  organizationId: number | null;
+  libraryId: number | null;
+  isPrimary: boolean;
+  status: string;
+  joinedAt: string | null;
+}
+
+/** Which tenant a membership list belongs to. */
+export type MembershipScope = "organizations" | "libraries";

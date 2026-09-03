@@ -62,6 +62,13 @@ export const API_GAPS = {
     status: "not-modelled",
     note: "Total Students comes from the paged student endpoint and the seat tiles from the seat endpoints. The remaining tiles need attendance, memberships or payments first.",
   },
+  userDirectory: {
+    capability: "Searching users who are not yet members, to add them to a tenant",
+    suggestedEndpoint: "GET /api/users?search=",
+    status: "schema-only",
+    tables: ["users", "user_role"],
+    note: "Membership endpoints exist and take a userId, but nothing lists or searches users. Library members can be picked from the organization member list; adding someone to an organization needs the numeric user id.",
+  },
   currentUser: {
     capability: "Authenticated user's profile, roles and display name",
     suggestedEndpoint: "GET /api/auth/me",
@@ -87,6 +94,8 @@ export const AVAILABLE_APIS = [
   "POST/DELETE /api/libraries/{id}/seats/{seatId}/allocation",
   "GET /api/libraries/{id}/seat-types, /seat-zones",
   "GET /api/students/{id}/seat-allocation",
-  "POST/DELETE /api/organizations/{id}/members",
-  "POST/DELETE /api/libraries/{id}/members",
+  "GET/POST/DELETE /api/organizations/{id}/members",
+  "GET/POST/DELETE /api/libraries/{id}/members",
+  "PUT /api/organizations/{id}/members/{userId}/status, /primary",
+  "PUT /api/libraries/{id}/members/{userId}/status, /primary",
 ] as const;

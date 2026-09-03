@@ -6,6 +6,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableWrap, Td, Th, Tr } from "@/components/ui/table";
 import { EmptyState, LoadingState } from "@/components/ui/states";
 import { AddressPanel } from "@/features/addresses/address-panel";
+import { MemberPanel } from "@/features/memberships/member-panel";
+import { useMembers } from "@/hooks/use-memberships";
 import { PageHeader } from "@/layouts/app-shell";
 import { AVAILABLE_APIS } from "@/lib/api-gaps";
 import { useSession } from "@/providers/session-provider";
@@ -25,7 +27,17 @@ export default function SettingsPage() {
     tenantLoading,
     authorities,
     can,
+    username,
   } = useSession();
+
+  // Library membership is constrained to members of the owning organization, so
+  // the organization member list doubles as the candidate list for a library.
+  // Only fetched when the user may actually read it.
+  const canViewMembers = can("USER_VIEW");
+  const orgMembers = useMembers(
+    "organizations",
+    canViewMembers ? (activeOrganization?.organizationId ?? null) : null,
+  );
 
   return (
     <>
@@ -133,6 +145,33 @@ export default function SettingsPage() {
               </TableWrap>
             )}
           </Card>
+
+          {/*
+            Staff membership of a tenant. USER_VIEW/USER_CREATE/USER_UPDATE are
+            granted only to Super Admin and Organization Owner, so a
+            library-scoped role sees no membership section at all rather than a
+            row of controls that would 403.
+          */}
+          {canViewMembers && activeOrganization ? (
+            <MemberPanel
+              scope="organizations"
+              tenantId={activeOrganization.organizationId}
+              title={`${activeOrganization.name} — Members`}
+              canManage={can("USER_CREATE") || can("USER_UPDATE")}
+              currentUsername={username}
+            />
+          ) : null}
+
+          {canViewMembers && activeLibrary ? (
+            <MemberPanel
+              scope="libraries"
+              tenantId={activeLibrary.libraryId}
+              title={`${activeLibrary.name} — Members`}
+              canManage={can("USER_CREATE") || can("USER_UPDATE")}
+              candidates={orgMembers.data}
+              currentUsername={username}
+            />
+          ) : null}
 
           {/*
             Addresses are shown for the tenants the user can actually read.
