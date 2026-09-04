@@ -1,0 +1,24 @@
+# ClusterIP + `kubectl port-forward`, matching the backend Service. NodePort is
+# not usable here: this Docker Desktop node is kind-based, so node ports are not
+# published to the Windows host and the node IP is not routable from it.
+#
+# The namespace is the backend's, already created by
+# library-saas-backend/k8s/namespace.yaml, so no namespace manifest is duplicated.
+apiVersion: v1
+kind: Service
+metadata:
+  name: library-saas-frontend
+  namespace: library-saas
+  labels:
+    app.kubernetes.io/name: library-saas
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: library-saas
+    app.kubernetes.io/component: frontend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP

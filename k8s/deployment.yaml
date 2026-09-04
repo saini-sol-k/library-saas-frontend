@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: library-saas-frontend
+  namespace: library-saas
+  labels:
+    app.kubernetes.io/name: library-saas
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: library-saas
+      app.kubernetes.io/component: frontend
+  # Recreate, matching the backend. On this 2-CPU Docker VM a rolling update
+  # briefly runs two pods and starves the outgoing one's probes. With one replica
+  # the surge buys nothing. Trade-off: a few seconds of downtime during a deploy.
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: library-saas
+        app.kubernetes.io/component: frontend
+    spec:
+      containers:
+        - name: app
+          # The node runs its own containerd image store, separate from the Docker
+          # daemon, so a locally built image is not visible to it. Images are
+          # published to the local registry; 192.168.65.254 is the host as seen
+          # from a Docker Desktop pod. The tag is replaced per build by
+          # `kubectl set image`, so this value is only a placeholder.
+          image: 192.168.65.254:5000/library-saas-frontend:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 3000
+
+          env:
+            # In-cluster DNS name of the backend Service. This is read on the
+            # server only, by src/lib/env.ts, and never reaches the browser: the
+            # browser talks to this app's own /api/backend proxy. It must not be
+            # a localhost URL, which would resolve to this pod rather than the
+            # backend.
+            - name: BACKEND_API_URL
+              value: "http://library-saas-backend:8080"
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+
+          # /login is a static page that renders without calling the backend, so
+          # readiness reflects this pod's own health rather than the backend's.
+          startupProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 24
+
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 4
+
+          # Slower to fire than readiness: a host under load should drop out of
+          # service, not be killed and restarted.
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "768Mi"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            capabilities:
+              drop: ["ALL"]
