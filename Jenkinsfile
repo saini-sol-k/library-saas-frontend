@@ -53,8 +53,8 @@ pipeline {
                          'localhost:5000, which is the same registry container.')
         string(
             name: 'VERIFY_PORT',
-            defaultValue: '3095',
-            description: 'Local port used for the port-forward during verification. ' +
+            defaultValue: '3096',
+            description: 'Local port used for the port-forward during verification. 3095 is reserved for the pf-3095.sh viewing forward. ' +
                          'Must not collide with 3000/8080/8081/8082/8095.')
     }
 
