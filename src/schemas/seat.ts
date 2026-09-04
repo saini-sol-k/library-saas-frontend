@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_SEAT_COUNT, SEAT_COUNT_MESSAGES } from "@/schemas/admin";
 import { SETTABLE_SEAT_STATUSES } from "@/types/seat";
 
 /**
@@ -31,3 +32,21 @@ export const allocationSchema = z.object({
 });
 
 export type AllocationValues = z.infer<typeof allocationSchema>;
+
+/**
+ * The configured number of seats for a library.
+ *
+ * The same rules the onboarding form applies, reusing the same message strings
+ * so a value rejected here reads identically to the backend's own refusal.
+ */
+export const seatCountSchema = z.object({
+  seatCount: z
+    .string()
+    .trim()
+    .min(1, SEAT_COUNT_MESSAGES.required)
+    .regex(/^\d+$/, SEAT_COUNT_MESSAGES.whole)
+    .refine((value) => Number(value) > 0, SEAT_COUNT_MESSAGES.positive)
+    .refine((value) => Number(value) <= MAX_SEAT_COUNT, SEAT_COUNT_MESSAGES.max),
+});
+
+export type SeatCountValues = z.infer<typeof seatCountSchema>;

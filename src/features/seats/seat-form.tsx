@@ -73,7 +73,10 @@ export function SeatForm({
       }
       return;
     }
-    if (error.errorCode === "SEAT_NUMBER_ALREADY_EXISTS") {
+    if (
+      error.errorCode === "SEAT_NUMBER_ALREADY_EXISTS"
+      || error.errorCode === "SEAT_NUMBER_NOT_EDITABLE"
+    ) {
       setError("seatNumber", { type: "server", message: messageFor(error) });
     }
     if (error.errorCode === "INVALID_SEAT_STATUS" || error.errorCode === "SEAT_HAS_ACTIVE_ALLOCATION") {
@@ -83,9 +86,12 @@ export function SeatForm({
 
   const pinned =
     error instanceof ApiError &&
-    ["SEAT_NUMBER_ALREADY_EXISTS", "INVALID_SEAT_STATUS", "SEAT_HAS_ACTIVE_ALLOCATION"].includes(
-      error.errorCode ?? "",
-    );
+    [
+      "SEAT_NUMBER_ALREADY_EXISTS",
+      "SEAT_NUMBER_NOT_EDITABLE",
+      "INVALID_SEAT_STATUS",
+      "SEAT_HAS_ACTIVE_ALLOCATION",
+    ].includes(error.errorCode ?? "");
 
   const formLevelError =
     error instanceof ApiError && !error.fieldErrors && !pinned ? messageFor(error) : null;
@@ -115,17 +121,30 @@ export function SeatForm({
       ) : null}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/*
+          The seat number is fixed once the seat exists. It identifies the
+          physical sheet a student is sent to and is what attendance and
+          allocation history are read against, so it is presented read-only when
+          editing. That is a convenience, not the boundary: the backend refuses a
+          changed number with SEAT_NUMBER_NOT_EDITABLE, which is pinned below.
+
+          readOnly rather than disabled, so the value is still registered and
+          submitted - the backend requires it and compares it with the stored one.
+        */}
         <Field
           label="Seat number"
           htmlFor="seatNumber"
           required
           error={errors.seatNumber?.message}
-          hint="Must be unique within this library"
+          hint={isEdit ? "Assigned when the seat was created and cannot be changed" : "Must be unique within this library"}
         >
           <Input
             id="seatNumber"
             invalid={Boolean(errors.seatNumber)}
             placeholder="A001"
+            readOnly={isEdit}
+            aria-readonly={isEdit || undefined}
+            className={isEdit ? "cursor-not-allowed bg-page text-ink2" : undefined}
             {...register("seatNumber")}
           />
         </Field>

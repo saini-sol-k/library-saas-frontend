@@ -93,8 +93,38 @@ export interface LibraryResponse {
   closingTime: string | null;
   timezone: string | null;
   currency: string | null;
+  /** How many seats the library is configured to have. Zero means not yet configured. */
+  seatCount: number;
   createdAt: string | null;
   updatedAt: string | null;
+}
+
+/**
+ * The seat count is changed through its own endpoint rather than
+ * LibraryUpdateRequest: it creates, removes or retires seat rows rather than
+ * editing a field, and the reply reports what it did.
+ */
+export interface LibrarySeatCountRequest {
+  seatCount: number;
+}
+
+export interface LibrarySeatCountResponse {
+  libraryId: number;
+  libraryName: string;
+  previousSeatCount: number | null;
+  seatCount: number;
+  seatsCreated: number;
+  seatsReactivated: number;
+  /** Deleted outright, because nothing had ever referenced them. */
+  seatsRemoved: number;
+  /** Kept as INACTIVE rows, because allocation or attendance history points at them. */
+  seatsRetired: number;
+  /** created + reactivated. */
+  seatsAdded: number;
+  /** removed + retired. */
+  seatsWithdrawn: number;
+  /** e.g. "101 - 120". Null when the count was already the requested value. */
+  seatRange: string | null;
 }
 
 export interface LibraryUpdateRequest {
@@ -591,6 +621,8 @@ export interface CustomerOnboardingRequest {
   organizationCode?: string;
   libraryName: string;
   libraryCode?: string;
+  /** Seats created for the new library, numbered from 1. Required, 1-10000. */
+  seatCount: number;
   timezone?: string;
   adminUsername: string;
   adminEmail: string;
@@ -605,7 +637,16 @@ export interface CustomerOnboardingRequest {
  */
 export interface CustomerOnboardingResponse {
   organization: { organizationId: number; organizationCode: string; name: string };
-  library: { libraryId: number; libraryCode: string; name: string; timezone: string };
+  library: {
+    libraryId: number;
+    libraryCode: string;
+    name: string;
+    timezone: string;
+    seatCount: number;
+    seatsCreated: number;
+    /** e.g. "1 - 100". */
+    seatRange: string | null;
+  };
   user: { userId: number; username: string; email: string; roleCode: string };
   initialCredentials: { username: string; temporaryPassword: string };
 }

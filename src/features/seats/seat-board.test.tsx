@@ -365,3 +365,56 @@ describe("SeatBoard allocation flow", () => {
     });
   });
 });
+
+/**
+ * Generated seats are the ordinary case now: a library onboarded with N seats
+ * gets rows numbered "1".."N", so the board has to show plain numbers as
+ * legibly as it shows the lettered ones, and editing one must not offer to
+ * renumber it.
+ */
+describe("SeatBoard with generated seat numbers", () => {
+  const GENERATED = [
+    seat({ seatId: 11, seatNumber: "1", status: "AVAILABLE" }),
+    seat({ seatId: 12, seatNumber: "2", status: "OCCUPIED" }),
+    seat({ seatId: 13, seatNumber: "3", status: "MAINTENANCE" }),
+  ];
+
+  /**
+   * Scoped to the seat grid on purpose: the summary strip above it also renders
+   * bare digits, so an unscoped query for "1" would match a count as readily as
+   * a seat and prove nothing about what the board shows.
+   */
+  function grid(container: HTMLElement) {
+    const element = container.querySelector(".grid.grid-cols-1.gap-3");
+    expect(element).not.toBeNull();
+    return element as HTMLElement;
+  }
+
+  it("shows every generated number with its status", async () => {
+    const { container } = renderBoard(routeFetch({}, GENERATED));
+
+    await screen.findByRole("button", { name: /edit seat 1/i });
+    const seats = grid(container);
+
+    expect(within(seats).getByText("1")).toBeInTheDocument();
+    expect(within(seats).getByText("2")).toBeInTheDocument();
+    expect(within(seats).getByText("3")).toBeInTheDocument();
+    expect(within(seats).getByText("Occupied")).toBeInTheDocument();
+    expect(within(seats).getByText("Maintenance")).toBeInTheDocument();
+
+    const total = screen.getByText("Total").closest("div");
+    expect(within(total as HTMLElement).getByText("3")).toBeInTheDocument();
+  });
+
+  it("opens the edit dialog with the number locked", async () => {
+    const user = userEvent.setup();
+    renderBoard(routeFetch({}, GENERATED));
+
+    await user.click(await screen.findByRole("button", { name: /edit seat 1/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    const input = within(dialog).getByLabelText(/seat number/i);
+    expect(input).toHaveValue("1");
+    expect(input).toHaveAttribute("readonly");
+  });
+});

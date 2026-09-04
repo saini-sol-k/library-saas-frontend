@@ -1,6 +1,8 @@
 import { apiClient } from "@/lib/api-client";
 import type {
   LibraryResponse,
+  LibrarySeatCountRequest,
+  LibrarySeatCountResponse,
   LibraryUpdateRequest,
   OrganizationResponse,
   OrganizationUpdateRequest,
@@ -27,6 +29,15 @@ export const tenantService = {
   getLibrary: (id: number) => apiClient.get<LibraryResponse>(`libraries/${id}`),
   updateLibrary: (id: number, body: LibraryUpdateRequest) =>
     apiClient.put<LibraryResponse>(`libraries/${id}`, body),
+
+  /**
+   * The seat count has its own endpoint because it is not a field edit: it
+   * creates, removes or retires seat rows, and the reply reports what changed
+   * rather than returning the library. The backend allows it only for
+   * SUPER_ADMIN or an owner of this library.
+   */
+  updateSeatCount: (id: number, body: LibrarySeatCountRequest) =>
+    apiClient.patch<LibrarySeatCountResponse>(`libraries/${id}/seat-count`, body),
 };
 
 export const authService = {

@@ -8,6 +8,7 @@ import { Field, Input, Select } from "@/components/ui/field";
 import { ApiError, messageFor } from "@/lib/api-error";
 import {
   customerOnboardingSchema,
+  MAX_SEAT_COUNT,
   TIMEZONES,
   type CustomerOnboardingValues,
 } from "@/schemas/admin";
@@ -53,6 +54,7 @@ export function CustomerOnboardingForm({
     "EMAIL_ALREADY_EXISTS",
     "ORGANIZATION_CODE_ALREADY_EXISTS",
     "INVALID_TIMEZONE",
+    "INVALID_SEAT_COUNT",
   ];
 
   const codeErrorFor = (code: string) => (apiError?.errorCode === code ? apiError.message : undefined);
@@ -72,7 +74,12 @@ export function CustomerOnboardingForm({
     // the browser's native constraint bubbles would otherwise pre-empt the
     // submit handler and the app's own messages would never be shown.
     <form
-      onSubmit={handleSubmit((values) => onSubmit(pruneEmpty(values)))}
+      // seatCount is the one value the backend wants as a number rather than a
+      // string, and it is never blank by the time validation passes, so it is
+      // converted here instead of going through pruneEmpty with the rest.
+      onSubmit={handleSubmit(({ seatCount, ...rest }) =>
+        onSubmit({ ...pruneEmpty(rest), seatCount: Number(seatCount) }),
+      )}
       className="space-y-4"
       noValidate
     >
@@ -111,6 +118,24 @@ export function CustomerOnboardingForm({
             error={errorFor("libraryCode")}
           >
             <Input id="libraryCode" {...register("libraryCode")} />
+          </Field>
+          <Field
+            label="Number of seats"
+            htmlFor="seatCount"
+            required
+            hint={`The system creates this many seats and numbers them 1 upwards. Up to ${MAX_SEAT_COUNT}.`}
+            error={errorFor("seatCount") ?? codeErrorFor("INVALID_SEAT_COUNT")}
+          >
+            <Input
+              id="seatCount"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={MAX_SEAT_COUNT}
+              step={1}
+              placeholder="100"
+              {...register("seatCount")}
+            />
           </Field>
           <Field
             label="Timezone"

@@ -64,6 +64,19 @@ export function OnboardingResult({
             <dd className="font-medium text-ink">{result.user.email}</dd>
             <p className="text-[12px] text-ink3">Role: {result.user.roleCode}</p>
           </div>
+          {/*
+            Seats are reported back from the response rather than echoed from the
+            form: the backend generates the numbers, so what it says it created is
+            the only trustworthy account of what exists.
+          */}
+          <div>
+            <dt className="text-[13px] text-ink3">Number of seats</dt>
+            <dd className="font-medium text-ink">{result.library.seatCount}</dd>
+            <p className="text-[12px] text-ink3">
+              {result.library.seatsCreated} seats created
+              {result.library.seatRange ? ` · ${result.library.seatRange}` : null}
+            </p>
+          </div>
         </dl>
       </Card>
 

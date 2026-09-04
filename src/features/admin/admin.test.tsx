@@ -13,7 +13,15 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const RESULT: CustomerOnboardingResponse = {
   organization: { organizationId: 9, organizationCode: "CUST-A", name: "Customer A" },
-  library: { libraryId: 14, libraryCode: "LIB-A", name: "Library A", timezone: "Asia/Kolkata" },
+  library: {
+    libraryId: 14,
+    libraryCode: "LIB-A",
+    name: "Library A",
+    timezone: "Asia/Kolkata",
+    seatCount: 100,
+    seatsCreated: 100,
+    seatRange: "1 - 100",
+  },
   user: { userId: 21, username: "admina", email: "admina@customer.example", roleCode: "ORGANIZATION_OWNER" },
   initialCredentials: { username: "admina", temporaryPassword: "Kj7mQp2xRt9wVzAb" },
 };
@@ -26,6 +34,7 @@ function wrap(ui: React.ReactNode) {
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/organization name/i), "Customer A");
   await user.type(screen.getByLabelText(/library name/i), "Library A");
+  await user.type(screen.getByLabelText(/number of seats/i), "100");
   await user.type(screen.getByLabelText(/first name/i), "Asha");
   await user.type(screen.getByLabelText(/login username/i), "admina");
   await user.type(screen.getByLabelText(/^email/i), "admina@customer.example");
@@ -236,5 +245,121 @@ describe("OnboardingResult", () => {
     await user.click(screen.getByRole("button", { name: /create another customer/i }));
 
     expect(onCreateAnother).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * The number of seats at onboarding.
+ *
+ * The rules here mirror the backend's, which stays authoritative - these only
+ * spare the product owner a round trip. What matters is that none of them can be
+ * skipped: the form submits with noValidate, so a rejection the schema misses
+ * would reach the server rather than being caught by the browser.
+ */
+describe("CustomerOnboardingForm - number of seats", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  async function fillEverythingExceptSeats(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(screen.getByLabelText(/organization name/i), "Customer A");
+    await user.type(screen.getByLabelText(/library name/i), "Library A");
+    await user.type(screen.getByLabelText(/first name/i), "Asha");
+    await user.type(screen.getByLabelText(/login username/i), "admina");
+    await user.type(screen.getByLabelText(/^email/i), "admina@customer.example");
+  }
+
+  /** Types a seat count into an otherwise valid form and submits it. */
+  async function submitWithSeats(seats: string, onSubmit: ReturnType<typeof vi.fn>) {
+    const user = userEvent.setup();
+    wrap(<CustomerOnboardingForm submitting={false} error={null} onSubmit={onSubmit} />);
+
+    await fillEverythingExceptSeats(user);
+    if (seats !== "") {
+      await user.type(screen.getByLabelText(/number of seats/i), seats);
+    }
+    await user.click(screen.getByRole("button", { name: /create customer/i }));
+    return user;
+  }
+
+  it("asks for the number of seats", () => {
+    wrap(<CustomerOnboardingForm submitting={false} error={null} onSubmit={vi.fn()} />);
+    expect(screen.getByLabelText(/number of seats/i)).toBeInTheDocument();
+  });
+
+  it("requires it", async () => {
+    const onSubmit = vi.fn();
+    await submitWithSeats("", onSubmit);
+
+    expect(await screen.findByText("Number of seats is required.")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("rejects zero", async () => {
+    const onSubmit = vi.fn();
+    await submitWithSeats("0", onSubmit);
+
+    expect(await screen.findByText("Number of seats must be greater than 0.")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("rejects a negative number", async () => {
+    const onSubmit = vi.fn();
+    await submitWithSeats("-5", onSubmit);
+
+    expect(await screen.findByText("Number of seats must be a whole number.")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("rejects a decimal", async () => {
+    const onSubmit = vi.fn();
+    await submitWithSeats("1.5", onSubmit);
+
+    expect(await screen.findByText("Number of seats must be a whole number.")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("rejects a count above the limit", async () => {
+    const onSubmit = vi.fn();
+    await submitWithSeats("10001", onSubmit);
+
+    expect(await screen.findByText("Number of seats cannot exceed 10000.")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("submits a valid count as a number, not a string", async () => {
+    const onSubmit = vi.fn();
+    await submitWithSeats("100", onSubmit);
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(onSubmit.mock.calls[0][0].seatCount).toBe(100);
+  });
+
+  it("shows a rejected count from the backend against the field", () => {
+    wrap(
+      <CustomerOnboardingForm
+        submitting={false}
+        error={new ApiError("Number of seats cannot exceed 10000.", 400, "INVALID_SEAT_COUNT")}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Number of seats cannot exceed 10000.")).toBeInTheDocument();
+  });
+});
+
+describe("OnboardingResult - seats", () => {
+  it("reports the number of seats, the count created and the range", () => {
+    wrap(<OnboardingResult result={RESULT} onCreateAnother={vi.fn()} />);
+
+    expect(screen.getByText("Number of seats")).toBeInTheDocument();
+    expect(screen.getByText("100")).toBeInTheDocument();
+    expect(screen.getByText(/100 seats created/)).toBeInTheDocument();
+    expect(screen.getByText(/1 - 100/)).toBeInTheDocument();
+  });
+});
+
+describe("CustomerOnboardingForm hint", () => {
+  it("names the maximum number of seats the backend will accept", () => {
+    wrap(<CustomerOnboardingForm submitting={false} error={null} onSubmit={vi.fn()} />);
+    expect(screen.getByText(/up to 10000\./i)).toBeInTheDocument();
   });
 });

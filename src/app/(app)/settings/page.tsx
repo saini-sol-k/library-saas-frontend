@@ -7,6 +7,7 @@ import { Table, TableWrap, Td, Th, Tr } from "@/components/ui/table";
 import { EmptyState, LoadingState } from "@/components/ui/states";
 import { AddressPanel } from "@/features/addresses/address-panel";
 import { MemberPanel } from "@/features/memberships/member-panel";
+import { SeatCountPanel } from "@/features/seats/seat-count-panel";
 import { useMembers } from "@/hooks/use-memberships";
 import { PageHeader } from "@/layouts/app-shell";
 import { AVAILABLE_APIS } from "@/lib/api-gaps";
@@ -106,6 +107,7 @@ export default function SettingsPage() {
                       <Th>Code</Th>
                       <Th>Name</Th>
                       <Th>Hours</Th>
+                      <Th className="text-right">Seats</Th>
                       <Th>Currency</Th>
                       <Th>Status</Th>
                       <Th className="text-right">Active</Th>
@@ -121,6 +123,7 @@ export default function SettingsPage() {
                             ? `${library.openingTime} – ${library.closingTime}`
                             : "—"}
                         </Td>
+                        <Td className="text-right tabular-nums">{library.seatCount ?? 0}</Td>
                         <Td>{library.currency || "—"}</Td>
                         <Td>
                           <StatusBadge status={library.status} />
@@ -145,6 +148,17 @@ export default function SettingsPage() {
               </TableWrap>
             )}
           </Card>
+
+          {/*
+            Seat capacity for the library currently in context. LIBRARY_UPDATE is
+            granted only to Super Admin and Organization Owner, so a receptionist,
+            accountant, library manager or staff member sees nothing here rather
+            than a control that would 403. The backend enforces the same rule and
+            additionally requires membership of this library.
+          */}
+          {can("LIBRARY_UPDATE") && activeLibrary ? (
+            <SeatCountPanel library={activeLibrary} />
+          ) : null}
 
           {/*
             Staff membership of a tenant. USER_VIEW/USER_CREATE/USER_UPDATE are
