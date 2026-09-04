@@ -575,3 +575,37 @@ export interface OutstandingSummaryResponse {
 /** The window the dashboard has asked for since Phase 1, and the backend cap. */
 export const EXPIRY_WINDOW_DEFAULT_DAYS = 15;
 export const EXPIRY_WINDOW_MAX_DAYS = 365;
+
+/* ---------------------------------------------------------------- admin ---- */
+
+/**
+ * Onboarding a new SaaS customer. Super-admin only.
+ *
+ * There is no password field: the backend generates the initial password, so it
+ * is never typed into a browser and never travels in a request body.
+ * Organization and library codes are optional and derived from the names when
+ * omitted.
+ */
+export interface CustomerOnboardingRequest {
+  organizationName: string;
+  organizationCode?: string;
+  libraryName: string;
+  libraryCode?: string;
+  timezone?: string;
+  adminUsername: string;
+  adminEmail: string;
+  adminFirstName: string;
+  adminLastName?: string;
+  adminMobile?: string;
+}
+
+/**
+ * The only shape that ever carries an initial password, and only in the reply to
+ * the creation call. Nothing fetches it afterwards.
+ */
+export interface CustomerOnboardingResponse {
+  organization: { organizationId: number; organizationCode: string; name: string };
+  library: { libraryId: number; libraryCode: string; name: string; timezone: string };
+  user: { userId: number; username: string; email: string; roleCode: string };
+  initialCredentials: { username: string; temporaryPassword: string };
+}

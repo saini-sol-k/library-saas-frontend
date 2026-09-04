@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Bell,
+  Building2,
   CalendarCheck,
   CreditCard,
   LayoutDashboard,
@@ -16,7 +17,11 @@ export interface NavItem {
   href: string;
   label: string;
   icon: React.ElementType;
-  /** Backend permission the item needs. Undefined means always visible. */
+  /**
+   * Backend permission the item needs. Undefined means always visible.
+   * ROLE_SUPER_ADMIN satisfies every authority, so a platform-only item states
+   * that role explicitly rather than a permission code every tenant role holds.
+   */
   authority?: string;
   /** Set when the screen has no backend yet, so the UI can mark it. */
   gap?: ApiGapKey;
@@ -50,6 +55,19 @@ export const NAVIGATION: NavSection[] = [
       },
       { href: "/notifications", label: "Notifications", icon: Bell, gap: "notifications" },
       { href: "/reports", label: "Reports", icon: BarChart3, authority: "REPORT_VIEW" },
+    ],
+  },
+  {
+    // Platform administration, not tenant administration. Every item here is
+    // visible only to the product owner; the backend enforces that separately.
+    label: "Platform",
+    items: [
+      {
+        href: "/admin/customers/new",
+        label: "Onboard Customer",
+        icon: Building2,
+        authority: "ROLE_SUPER_ADMIN",
+      },
     ],
   },
   {
