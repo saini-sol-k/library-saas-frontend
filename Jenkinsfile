@@ -228,8 +228,18 @@ pipeline {
 
                     # The namespace belongs to the backend repository and is assumed to
                     # exist; only the frontend's own objects are applied here.
-                    cmd /c "kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml 2>&1"
+                    # Render the real image into the manifest BEFORE applying it. The committed
+                    # manifest carries a :latest placeholder and the strategy is Recreate, so
+                    # applying it as-is first rolls the deployment onto a tag that does not exist
+                    # in the registry, killing the serving pod; if anything then fails before
+                    # set image runs, the service stays down on an unpullable image.
+                    $image = "$env:REGISTRY/$env:IMAGE_NAME`:$env:IMAGE_TAG"
+                    $manifest = (Get-Content k8s/deployment.yaml -Raw) -replace "image: .*library-saas-frontend:.*", "image: $image"
+                    if ($manifest -notmatch [regex]::Escape($image)) { throw "manifest render failed: image not substituted" }
+                    $manifest | Out-File -FilePath "deploy/deployment.rendered.yaml" -Encoding ascii
+                    cmd /c "kubectl apply -f deploy/deployment.rendered.yaml -f k8s/service.yaml 2>&1"
                     if ($LASTEXITCODE -ne 0) { throw "kubectl apply failed" }
+                    Remove-Item "deploy/deployment.rendered.yaml" -Force -ErrorAction SilentlyContinue
 
                     $image = "$env:REGISTRY/$env:IMAGE_NAME`:$env:IMAGE_TAG"
                     cmd /c "kubectl -n $ns set image deployment/$env:DEPLOYMENT app=$image 2>&1"

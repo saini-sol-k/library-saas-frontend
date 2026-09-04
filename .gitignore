@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Pipeline working files: port-forward pid/logs and the rendered manifest.
+deploy/
