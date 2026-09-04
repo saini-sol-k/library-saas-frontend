@@ -25,6 +25,33 @@ const HOP_BY_HOP = new Set([
   "content-length",
 ]);
 
+/**
+ * Headers the browser attaches to describe ITS request, which must not be
+ * replayed onto ours.
+ *
+ * This hop is server to server: Next.js calling Spring Boot. Forwarding the
+ * browser's Origin made the backend see a cross-origin browser request and
+ * answer "Invalid CORS request", because its allow-list is deliberately empty -
+ * no cross-origin caller is trusted, and none is needed. Browsers send Origin on
+ * every POST, PUT and DELETE even when same-origin, so every write in the
+ * application failed this way while same-origin GETs, which carry no Origin,
+ * kept working.
+ *
+ * Sec-Fetch-* and Referer go too: they describe the browser's navigation
+ * context and mean nothing to the API.
+ */
+const BROWSER_ONLY = new Set([
+  "origin",
+  "referer",
+  "sec-fetch-dest",
+  "sec-fetch-mode",
+  "sec-fetch-site",
+  "sec-fetch-user",
+  "sec-ch-ua",
+  "sec-ch-ua-mobile",
+  "sec-ch-ua-platform",
+]);
+
 async function callBackend(
   request: Request,
   targetUrl: string,
@@ -34,7 +61,8 @@ async function callBackend(
 ) {
   const headers = new Headers();
   request.headers.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase()) && key.toLowerCase() !== "cookie") {
+    const name = key.toLowerCase();
+    if (!HOP_BY_HOP.has(name) && !BROWSER_ONLY.has(name) && name !== "cookie") {
       headers.set(key, value);
     }
   });
